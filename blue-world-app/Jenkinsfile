@@ -1,0 +1,19 @@
+pipeline{
+    agent any
+    stages{
+        echo "Starting the Jenkins pipeline for code checkout"
+        stage{
+            steps("check-out-code"){
+                echo "Checking out code from GitHub repository"
+                if (env.BRANCH_NAME == 'beanstalk-project') {
+                    echo "Checking out code from the 'beanstalk-project' branch"
+                } else {
+                    echo "Checking out code from the default branch"
+                } 
+                checkout scmGit(branches: [[name: '*/beanstalk-project']], extensions: [], userRemoteConfigs: [[credentialsId: 'docker-cred', url: 'https://github.com/SivaSuribabu/elasticbeanstalk.git']])
+                echo "Code checkout completed"
+            }
+        echo "Code checkout stage completed"
+        }
+    }
+}
