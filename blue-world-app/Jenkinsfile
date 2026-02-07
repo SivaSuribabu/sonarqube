@@ -3,12 +3,17 @@ pipeline{
     stages{
         stage("source code checkout"){
             steps{
-                checkout scmGit(branches: [[name: '*/beanstalk-project']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/SivaSuribabu/elasticbeanstalk.git']])
-                dir('blue-world-app'){
-                    sh 'mvn clean package'
+                echo"========source code checkout stage====="
+                script{
+                    try{
+                        checkout scmGit(branches: [[name: '*/beanstalk-project']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/SivaSuribabu/elasticbeanstalk.git']])
+                        echo"========source code checkout stage completed====="
+                    } catch (err){
+                        echo"========source code checkout stage failed====="
+                        error"Checkout failed: ${err.message}"
+                    }
                 }
-
             }
         }
-    }
+    }   
 }
