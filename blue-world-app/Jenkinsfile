@@ -12,6 +12,10 @@ pipeline{
                 } 
                 checkout scmGit(branches: [[name: '*/beanstalk-project']], extensions: [], userRemoteConfigs: [[credentialsId: 'docker-cred', url: 'https://github.com/SivaSuribabu/elasticbeanstalk.git']])
                 echo "Code checkout completed"
+                dir("blue-world-app") {
+                    mvn clean install -DskipTests
+                    echo "Maven build completed successfully"
+                }
             }
         echo "Code checkout stage completed"
         }
