@@ -10,7 +10,7 @@ pipeline{
                 } else {
                     echo "Checking out code from the default branch"
                 } 
-                checkout scmGit(branches: [[name: '*/beanstalk-project']], extensions: [], userRemoteConfigs: [[credentialsId: 'docker-cred', url: 'https://github.com/SivaSuribabu/elasticbeanstalk.git']])
+                checkout scmGit(branches: [[name: '*/beanstalk-project/blue-world-app/']], extensions: [], userRemoteConfigs: [[credentialsId: 'docker-cred', url: 'https://github.com/SivaSuribabu/elasticbeanstalk.git']])
                 echo "Code checkout completed"
                 dir("blue-world-app") {
                     mvn clean install -DskipTests
