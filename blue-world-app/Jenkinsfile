@@ -2,11 +2,16 @@ pipeline{
     agent any
     stages{
         stage("checkout stage"){
-            
             steps{
                 echo "=====checkout stage====="
                 checkout scmGit(branches: [[name: '*/beanstalk-project']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/SivaSuribabu/elasticbeanstalk.git']])
                 echo "checkout successful"
+                }
+            }
+            post{
+                success{
+                    input message: "checkout stage successful, do you want to proceed to build stage?", ok: "Yes, let's proceed",
+                     ok: "Approve"
                 }
             }
         stage("build-stage"){
