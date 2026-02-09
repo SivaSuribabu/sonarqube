@@ -6,5 +6,13 @@ pipeline{
                 checkout scmGit(branches: [[name: '*/beanstalk-project']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/SivaSuribabu/elasticbeanstalk.git']])
             }
         }
+        stage("build-stage"){
+            when {
+                exression { return false}
+            }
+            steps{
+                sh "skipped"
+            }
+        }
     }
 }
