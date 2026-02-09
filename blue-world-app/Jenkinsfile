@@ -9,8 +9,6 @@ pipeline{
                 echo "checkout successful"
                 }
             }
-            
-        }
         stage("build-stage"){
             when {
                 expression { return false }
