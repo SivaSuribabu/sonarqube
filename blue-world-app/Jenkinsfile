@@ -8,7 +8,7 @@ pipeline{
         }
         stage("build-stage"){
             when {
-                exression { return false}
+                expression { return false }
             }
             steps{
                 sh "skipped"
