@@ -247,3 +247,114 @@ If Developer edition:
 
 Applications → application-1
 → Shows aggregated metrics
+
+
+Method 1 — Default Credentials (Try First)
+
+If password was never changed:
+
+Username: admin
+Password: admin
+
+
+If it asks to change password → reset there.
+
+✅ Method 2 — Reset Password Directly in Database (Most Reliable)
+
+SonarQube stores users in database.
+
+🔹 Step 1: Connect to SonarQube Database
+
+If using PostgreSQL (recommended production setup):
+
+psql -U sonar -d sonarqube
+
+
+If using Docker:
+
+docker exec -it <postgres-container> psql -U sonar -d sonarqube
+
+🔹 Step 2: Reset admin password
+
+Run this SQL:
+
+UPDATE users
+SET crypted_password = '$2a$10$wE3U8YxV0M1c4v0T1JxURePpS0l6cS0CwqR1h1YwS6fY0fRjGmL6K',
+    salt = null,
+    hash_method = 'BCRYPT'
+WHERE login = 'admin';
+
+
+This resets password to:
+
+admin
+
+🔹 Step 3: Restart SonarQube
+
+If Docker:
+
+docker restart sonarqube
+
+
+If system service:
+
+sudo systemctl restart sonarqube
+
+
+Now login:
+
+admin / admin
+
+
+It will force password change.
+
+✅ Method 3 — If Using Docker (No External DB)
+
+If you are running:
+
+docker run sonarqube:lts
+
+
+And using embedded DB (NOT recommended for prod):
+
+Easiest way:
+
+Stop container
+docker stop sonarqube
+docker rm sonarqube
+
+Remove volume (⚠️ This deletes data)
+docker volume rm <sonar-volume>
+
+Start fresh
+docker run -d -p 9000:9000 sonarqube:lts
+
+
+Default will be:
+
+admin / admin
+
+
+⚠️ Only do this if no important data.
+
+✅ Method 4 — If You Still Have DB Access but Not admin
+
+If another user has admin permission:
+
+Administration → Security → Users
+
+
+Reset password from UI.
+
+🔥 If You Don’t Know Which Setup You Have
+
+Run:
+
+docker ps
+
+
+If you see sonarqube container → Docker setup.
+
+Or check:
+
+systemctl status sonarqube
