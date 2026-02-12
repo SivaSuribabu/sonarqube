@@ -1,26 +1,94 @@
-pipeline{
+pipeline {
+
     agent any
-    stages{
-        stage("checkout stage"){
-            steps{
-                echo "=====checkout stage====="
-                checkout scmGit(branches: [[name: '*/beanstalk-project']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/SivaSuribabu/elasticbeanstalk.git']])
-                echo "checkout successful"
-                }
-            post{
-                success{
-                    input message: "checkout stage successful, do you want to proceed to build stage?", ok: "Yes, let's proceed"
+
+    tools {
+        maven 'Maven-3.9'
+    }
+
+    environment {
+        SONARQUBE_ENV = 'sonarqube-prod'
+        PROJECT_KEY   = 'blue-world'
+    }
+
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+        timestamps()
+    }
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Compile') {
+            steps {
+                sh 'mvn clean compile'
+            }
+        }
+
+        stage('Unit Tests & Coverage') {
+            steps {
+                sh 'mvn verify'
+            }
+        }
+
+        stage('Publish Test Reports') {
+            steps {
+                junit allowEmptyResults: true, testResults: 'target/surefire-reports/*.xml'
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv("${SONARQUBE_ENV}") {
+                    sh """
+                        mvn sonar:sonar \
+                          -Dsonar.projectKey=${PROJECT_KEY} \
+                          -Dsonar.projectName=${PROJECT_KEY} \
+                          -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
+                    """
                 }
             }
         }
-            
-        stage("build-stage"){
-            when {
-                expression { return false }
+
+        stage('Quality Gate') {
+            steps {
+                timeout(time: 5, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
             }
-            steps{
-                sh "skipped"
+        }
+
+        stage('Package WAR') {
+            steps {
+                sh 'mvn package -DskipTests'
             }
+        }
+
+        stage('Archive Artifact') {
+            steps {
+                archiveArtifacts artifacts: 'target/*.war', fingerprint: true
+            }
+        }
+
+    }
+
+    post {
+
+        success {
+            echo 'Pipeline completed successfully.'
+        }
+
+        failure {
+            echo 'Pipeline failed. Check quality gate or coverage.'
+        }
+
+        always {
+            cleanWs()
         }
     }
 }
