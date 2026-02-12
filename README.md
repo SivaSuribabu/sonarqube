@@ -330,3 +330,149 @@ If you see sonarqube container → Docker setup.
 Or check:
 
 systemctl status sonarqube
+
+
+
+
+
+
+*************
+Below is a clear, practical, DevOps-oriented answer for managing duplicate projects in SonarQube (UI + Linux CLI methods).
+1️⃣ Create a New Project in SonarQube
+✅ Using SonarQube UI
+Login to SonarQube → http://<server-ip>:9000
+Go to Projects → Create Project
+Choose:
+Manually
+Or From DevOps platform (GitHub/GitLab/Bitbucket)
+Provide:
+Project Key (unique, cannot duplicate)
+Project Name
+Generate Token
+Select analysis method:
+Maven
+Gradle
+CLI
+Done.
+✅ Using Linux Terminal (SonarScanner CLI)
+Install scanner (if not installed):
+Bash
+Copy code
+wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-5.0.1.3006-linux.zip
+unzip sonar-scanner-*.zip
+export PATH=$PATH:$PWD/sonar-scanner-*/bin
+Run scan:
+Bash
+Copy code
+sonar-scanner \
+  -Dsonar.projectKey=my-new-project \
+  -Dsonar.projectName="My New Project" \
+  -Dsonar.host.url=http://<server-ip>:9000 \
+  -Dsonar.login=<token>
+For Maven project:
+Bash
+Copy code
+mvn clean verify sonar:sonar \
+  -Dsonar.projectKey=my-new-project \
+  -Dsonar.host.url=http://<server-ip>:9000 \
+  -Dsonar.login=<token>
+2️⃣ Merge / Relate Duplicate Projects
+⚠ Important: SonarQube does NOT support merging two projects directly.
+Instead you have 3 clean approaches:
+✅ Option 1 – Use Same projectKey
+If duplicate projects exist because different keys were used:
+Delete unwanted project
+Re-run scan using correct existing projectKey
+Example:
+Bash
+Copy code
+-Dsonar.projectKey=correct-project-key
+That way analysis will append to same project.
+✅ Option 2 – Monorepo (Multiple Modules Under One Project)
+If you want multiple services under one app:
+Use:
+Bash
+Copy code
+-Dsonar.projectKey=main-app
+-Dsonar.modules=service1,service2
+Or for Maven multi-module project:
+Sonar automatically detects modules.
+✅ Option 3 – Use Applications (Enterprise Feature)
+If you have Enterprise edition:
+Go to:
+Copy code
+
+Projects → Applications → Create Application
+Add multiple projects under one logical application.
+3️⃣ Delete Unwanted Projects
+✅ Using UI
+Go to Projects
+Open project
+Click Administration
+Scroll down → Click Delete Project
+Confirm
+✅ Using Linux (API)
+Bash
+Copy code
+curl -u <token>: \
+  -X POST "http://<server-ip>:9000/api/projects/delete?project=<projectKey>"
+Example:
+Bash
+Copy code
+curl -u admin_token: \
+  -X POST "http://localhost:9000/api/projects/delete?project=test-duplicate"
+4️⃣ Rename Existing Project
+⚠ You can rename Project Name, but Project Key cannot be changed easily.
+✅ Rename Using UI
+Go to Project
+Click Project Settings
+Edit Project Name
+Save
+✅ Rename Using API
+Bash
+Copy code
+curl -u <token>: \
+  -X POST "http://<server-ip>:9000/api/projects/update?project=<projectKey>&name=NewName"
+5️⃣ If You Want to Change Project Key (Advanced)
+SonarQube does not allow direct key rename.
+Workaround:
+Create new project with new key
+Re-run analysis
+Delete old project
+🔥 DevOps Best Practice (Avoid Duplicates)
+Always define projectKey in:
+Maven pom.xml
+Xml
+Copy code
+<properties>
+  <sonar.projectKey>my-main-project</sonar.projectKey>
+</properties>
+Or in Jenkinsfile:
+Groovy
+Copy code
+withSonarQubeEnv('sonar-server') {
+    sh """
+    mvn sonar:sonar \
+    -Dsonar.projectKey=my-main-project
+    """
+}
+This prevents accidental duplicate creation.
+✅ Quick Summary
+Task
+Method
+Create project
+UI or sonar-scanner
+Merge projects
+Not supported (use same key or Applications)
+Delete project
+UI or API
+Rename project
+UI or API
+Change projectKey
+Create new + delete old
+If you want, tell me:
+Your SonarQube version
+Community or Enterprise?
+Maven or Gradle project?
+Jenkins or standalone?
+I’ll give you production-grade structure.
