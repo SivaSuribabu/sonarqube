@@ -338,7 +338,7 @@ systemctl status sonarqube
                                       Login to SonarQube → http://<server-ip>:9000
                                       Go to Projects → Create Project
                                       Choose:
-                                      Manually From DevOps platform (GitHub/GitLab/Bitbucket)
+                                      Manually or From DevOps platform (GitHub/GitLab/Bitbucket)
                                       
                                       Provide:
                                       Project Key (unique, cannot duplicate)
@@ -403,9 +403,9 @@ Instead you have 3 clean approaches:
                                                                         Copy code
                                                                         Projects → Applications → Create Application
                                                                         Add multiple projects under one logical application.
-                                                                        
 
-                                                                          3️⃣ Delete Unwanted Projects
+                                                                        
+                                                                          *************3️⃣ Delete Unwanted Projects*************
                                                                           ✅ Using UI
                                                                           Go to Projects
                                                                           Open project
@@ -424,7 +424,7 @@ Instead you have 3 clean approaches:
                                                                             -X POST "http://localhost:9000/api/projects/delete?project=test-duplicate"
 
 
-                                                                          4️⃣ Rename Existing Project
+                                                                          *************4️⃣ Rename Existing Project*************
                                                                           ⚠ You can rename Project Name, but Project Key cannot be changed easily.
                                                                           ✅ Rename Using UI
                                                                           Go to Project
@@ -437,7 +437,7 @@ Instead you have 3 clean approaches:
                                                                           curl -u <token>: \
                                                                             -X POST "http://<server-ip>:9000/api/projects/update?project=<projectKey>&name=NewName"
                                                                          
-                                                                          5️⃣ If You Want to Change Project Key (Advanced)
+                                                                          *************5️⃣ If You Want to Change Project Key (Advanced)*************
                                                                           SonarQube does not allow direct key rename.
                                                                           Workaround:
                                                                           Create new project with new key
@@ -461,22 +461,3 @@ Instead you have 3 clean approaches:
                                                                               """
                                                                           }
                                                                           This prevents accidental duplicate creation.
-✅ Quick Summary
-Task
-Method
-Create project
-UI or sonar-scanner
-Merge projects
-Not supported (use same key or Applications)
-Delete project
-UI or API
-Rename project
-UI or API
-Change projectKey
-Create new + delete old
-If you want, tell me:
-Your SonarQube version
-Community or Enterprise?
-Maven or Gradle project?
-Jenkins or standalone?
-I’ll give you production-grade structure.
