@@ -14,7 +14,7 @@ Reports separated like:
 I’ll explain this from installation → Jenkins integration → pipeline structure → UI organization strategy in a production-standard way.
 
 1️⃣ SonarQube Installation (Production Approach)
-Option A — Docker (Recommended for Dev / POC)
+***********Option A — Docker (Recommended for Dev / POC)***********
 docker run -d --name sonarqube \
   -p 9000:9000 \
   -e SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true \
@@ -25,50 +25,30 @@ Access:
 Default login:
               admin / admin
 
-Option B — Production Setup (Recommended)
+***********Option B — Production Setup (Recommended)***********
 
 Production should use:
-
-External PostgreSQL
-
-4GB+ RAM
-
-Separate volume storage
-
-Reverse proxy (Nginx)
-
-HTTPS
-
+                      External PostgreSQL
+                      4GB+ RAM
+                      Separate volume storage
+                      Reverse proxy (Nginx)
+                      HTTPS
 Architecture:
+              Jenkins → SonarQube Server → PostgreSQL DB
 
-Jenkins → SonarQube Server → PostgreSQL DB
+***********2️⃣ Install SonarQube Plugin in Jenkins***********
 
-2️⃣ Install SonarQube Plugin in Jenkins
-
-Go to:
-
-Manage Jenkins → Manage Plugins → Available
-
-
-Install:
-
-SonarQube Scanner
-
+Go to: Manage Jenkins → Manage Plugins → Available
+                                                    Install:SonarQube Scanner
 
 Then configure:
-
-Manage Jenkins → Configure System
-
-
-Add:
-
-SonarQube Server
-
-Name: sonarqube-prod
-
-URL: http://<sonar-ip>:9000
-
-Token: Generate from SonarQube
+                Manage Jenkins → Configure System
+                                                    Add:
+                                                          SonarQube Server
+                                                          Name: sonarqube-prod
+                                                          URL: http://<sonar-ip>:9000
+                                                          
+***********Token: Generate from SonarQube***********
 
 3️⃣ Create Token in SonarQube
 
