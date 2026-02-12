@@ -461,3 +461,95 @@ Instead you have 3 clean approaches:
                                                                               """
                                                                           }
                                                                           This prevents accidental duplicate creation.
+
+
+
+
+Jenkins file.
+
+pipeline {
+    agent any
+
+    tools {
+        maven 'M3'
+    }
+
+    environment {
+        SONAR_PROJECT_KEY = 'application1'
+        SONAR_PROJECT_NAME = 'Application1'
+        SONAR_HOST_URL = 'http://<sonar-server-ip>:9000'
+        MAVEN_OPTS = '-Xms512m -Xmx2048m'
+    }
+
+    options {
+        timestamps()
+        disableConcurrentBuilds()
+        buildDiscarder(logRotator(numToKeepStr: '20'))
+        timeout(time: 60, unit: 'MINUTES')
+    }
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                cleanWs()
+                checkout scm
+            }
+        }
+
+        stage('Build & Unit Test') {
+            steps {
+                sh 'mvn clean verify -DskipTests=false -T 4'
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('sonar-server') {
+                    sh """
+                        mvn sonar:sonar \
+                        -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
+                        -Dsonar.projectName=${SONAR_PROJECT_NAME}
+                    """
+                }
+            }
+        }
+
+        stage('Quality Gate') {
+            steps {
+                timeout(time: 5, unit: 'MINUTES') {
+                    script {
+                        def qualityGate = waitForQualityGate()
+                        if (qualityGate.status != 'OK') {
+                            error "Pipeline aborted due to Quality Gate failure: ${qualityGate.status}"
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Package WAR') {
+            steps {
+                sh 'mvn package -DskipTests'
+            }
+        }
+
+        stage('Archive Artifact') {
+            steps {
+                archiveArtifacts artifacts: '**/target/*.war', fingerprint: true
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Build Successful and Quality Gate Passed'
+        }
+        failure {
+            echo 'Build Failed'
+        }
+        always {
+            junit '**/target/surefire-reports/*.xml'
+        }
+    }
+}
