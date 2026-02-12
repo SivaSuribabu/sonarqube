@@ -1,17 +1,14 @@
 # sonarqube
 This Repo contains the sonarqube projects
 
-
 SonarQube integration into Jenkins
-
 Proper project structure in SonarQube UI
 
 Reports separated like:
-
-application-1
-  ├── service1
-  ├── service2
-  ├── service3
+                  application-1
+                    ├── service1
+                    ├── service2
+                    ├── service3
 
 
 I’ll explain this from installation → Jenkins integration → pipeline structure → UI organization strategy in a production-standard way.
@@ -23,15 +20,10 @@ docker run -d --name sonarqube \
   -e SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true \
   sonarqube:lts
 
-
 Access:
-
-http://<server-ip>:9000
-
-
+        http://<server-ip>:9000
 Default login:
-
-admin / admin
+              admin / admin
 
 Option B — Production Setup (Recommended)
 
